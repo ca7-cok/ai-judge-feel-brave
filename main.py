@@ -42,6 +42,20 @@ def main() -> int:
     destination_dir.mkdir(parents=True, exist_ok=True)
     destination = destination_dir / "entry.txt"
     destination.write_text(TEXT, encoding="utf-8")
+    # Read the file back and check it against the constant: the grader runs
+    # this program in a sandbox whose only writable directory is the output
+    # directory, so a write that silently lands nowhere (or gets truncated)
+    # must be caught here, while the run can still fail loudly, instead of
+    # shipping a wrong or empty entry.txt.
+    written = destination.read_text(encoding="utf-8")
+    if written != TEXT:
+        print("entry.txt read-back does not match the text constant",
+              file=sys.stderr)
+        return 1
+    if not 1 <= len(written) <= 280:
+        print(f"entry.txt is {len(written)} code points, must be 1-280",
+              file=sys.stderr)
+        return 1
     print(f"wrote {destination} ({len(TEXT)} code points)")
     return 0
 
